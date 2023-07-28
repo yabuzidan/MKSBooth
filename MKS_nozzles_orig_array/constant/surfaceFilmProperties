@@ -1,0 +1,155 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      SurfaceFilmProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+surfaceFilmModel thermoSingleLayer;
+
+regionName      wallFilmRegion;
+
+active          true;
+
+thermoSingleLayerCoeffs
+{
+    filmThermoModel liquid;
+
+    liquidCoeffs
+    {
+        useReferenceValues  no;
+        liquid      H2O;
+    }
+
+    // filmViscosityModel liquid;
+
+    // filmThermoModel constant;
+    // constantCoeffs
+    // {
+    //     specie      water;
+    //     rho0        1000;
+    //     mu0         1e-3;
+    //     sigma0      0.07;
+    // }
+
+    filmViscosityModel constant; // turn on to prevent film from flowing on surface. Can also simulate temporal spread on fabric
+    constantCoeffs
+    {
+        mu0   1e10; //constant viscosity [Pa.s]
+    }
+
+
+    //- Threshold film thickness beyond which the film is considered 'wet' (i.e. 'coverage' = 1)
+    deltaWet    75e-6;   // equivalent to 75 gsm (grams per square meter) of water
+    
+    hydrophilic true;
+    // - Length scale applied to deltaWet_ to determine when a dry surface becomes wet, typically 0.001
+    hydrophilicWetScale  1.0;
+    //- Length scale applied to deltaWet_ to determine when a wet surface becomes dry, typically 0.5.
+    hydrophilicDryScale  -1.0;  // Negative value - wet doesnt become dry
+
+
+    radiationModel  none;
+
+    turbulence  laminar;
+    laminarCoeffs
+    {
+        Cf          0.005;   // Skin friction coefficient
+    }
+
+    forces
+    (
+        // thermocapillary
+        distributionContactAngle     // Describes how droplets spread as they adhere to surface (hydrophobic vs hyrophillic)
+    );
+   
+    /* Higher contact angle (CA) -> lower wettability
+    CA = 180 deg:       Complete non-wetting - particles bead up and rolls on surface
+    CA > 150 degrees    Non-wetting - Superhydrophobic
+    CA > 90 degrees     Non-wetting - Hydrophobic
+    CA < 90 degrees     Wetting - Hydrophilic
+    CA = 0 deg:         Complete wetting - particles spread flat on surface
+    
+    Sample values (Wang et al, 2008):
+    Polyester fabric:  117.1 deg
+    Cotton fabric:     37.9 deg
+    Wool fabric:       108.0 deg
+    Nanofibre mat      132.6 deg
+    Filter paper       0.0 deg
+    Glass slide        33.5 deg
+    */
+    distributionContactAngleCoeffs
+    {
+        Ccf             1.0;
+
+        distribution
+        {
+            type            normal;
+            normalDistribution
+            {
+                minValue        0; //50
+                maxValue        0; //100
+                expectation     0; //75
+                variance        1;//100
+            }
+        }
+
+        zeroForcePatches ();
+    }
+
+    injectionModels
+    (
+        // drippingInjection
+    );
+
+    // drippingInjectionCoeffs
+    // {
+    //     cloudName    reactingCloud1;
+    //     deltaStable  0;
+
+    //     particlesPerParcel 100.0;
+
+    //     parcelDistribution
+    //     {
+    //         type         RosinRammler;
+    //         RosinRammlerDistribution
+    //         {
+    //             minValue        5e-04;
+    //             maxValue        0.0012;
+    //             d               7.5e-05;
+    //             n               0.5;
+    //         }
+    //     }
+    // }
+    
+    upperSurfaceModels
+    {
+        heatTransferModel constant;
+        constantCoeffs
+        {
+            c0                1e-8;
+        }
+    }
+
+    lowerSurfaceModels
+    {
+        heatTransferModel constant;
+        constantCoeffs
+        {
+            c0                1e-8;
+        }
+    }
+
+    phaseChangeModel none;
+
+}

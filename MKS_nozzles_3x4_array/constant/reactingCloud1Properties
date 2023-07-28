@@ -1,0 +1,290 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      reactingCloud1Properties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solution
+{
+    active          true;              //Activate or deactivate the particle cloud
+    coupled         yes;               //Enable or disable phase coupling
+    transient       yes;               //Transient or steady-state solution
+    cellValueSourceCorrection yes;     //Enable/disable correction of momentum transferred to the Eulerian phase
+    maxCo           0.3;               //Maximum Courant (CFL) Number
+
+    sourceTerms
+    {
+        schemes
+        //explicit or semiImplicit, relaxCoeff for each of the fields
+        {
+            rho             explicit 1;
+            U               explicit 1;
+            Yi              explicit 1;
+            h               explicit 1;
+            radiation       explicit 1;
+        }
+    }
+
+    interpolationSchemes
+    {
+        rho             cell;
+        U               cellPoint;
+        thermo:mu       cell;
+        T               cell;
+        Cp              cell;
+        kappa           cell;
+        p               cell;
+    }
+
+    integrationSchemes
+    {
+        U               Euler;
+        T               analytical;
+    }
+}
+
+// Properties of the particles (discrete phase)
+constantProperties
+{
+    rho0            1000; //density [kg.m3]
+    T0              300;  //temperature [K]
+    Cp0             4187; //specific heat capacity [J/kg/K]
+
+    constantVolume  false;
+}
+
+subModels
+{
+    particleForces
+    {
+        sphereDrag;
+        gravity;
+    }
+
+    injectionModels
+    {
+        model1
+        {
+            type            coneInjection;
+
+            // Times
+            SOI                 0.000;          // start of injection (time in s)
+            duration            100.0;          // total injection duration (s)
+            
+            // Quantities
+            massflowrate       0.000786111;   // kg/s - equivalent to 2.83 Litres per hour
+
+            massTotal           #calc "$massflowrate*$duration";    //Total mass to be injected (kg), unused when parcelBasisType=fixed.
+            parcelBasisType     mass; //fixed;
+            parcelsPerSecond    10000; //10000
+            // nParticle           1;           //number of particles in parcel (unused when parcelBasisType=mass)
+            
+            flowRateProfile constant 1;
+            // -or specify the source mass flow rate as a function of time
+            // flowRateProfile table
+            // (
+            //     (0              0.000)
+            //     (1e-02          0.300)
+            //     (2e-02          0.900)
+            //     (5e-02          1.000)
+            //     (1000           1.000)
+            // );
+
+            // Sizes
+            sizeDistribution
+            {
+                type         RosinRammler;
+                RosinRammlerDistribution
+                {
+                    minValue        100e-06;      // minimum droplet diameter m
+                    maxValue        250e-06;      // maximum droplet diameter m
+                    d               200e-06;      // most likely droplet size (mean) m
+                    n               2.0;          // Shape parameter
+                }
+            }
+            // {
+            //     type        fixedValue;
+            //     fixedValueDistribution
+            //     {
+            //         value   100e-06;
+            //     }
+            // }
+
+
+            // Geometry
+            position        ( 0  -0.40   1.60);
+            direction       ( 0.00   1.00   0.00);
+            thetaInner      constant 0;
+            thetaOuter      constant 15;
+
+            // - Inject at a point
+            injectionMethod point;
+
+            //// - Or, inject over a disc:
+            //injectionMethod disc;
+            //dInner          0;
+            //dOuter          0.05;
+
+            // Velocity
+
+            // // - Inject with constant velocity
+            flowType        constantVelocity;
+            Umag            11.2;
+
+            //// - Or, inject with flow rate and discharge coefficient
+            ////   This also requires massTotal, dInner and dOuter
+            //flowType        flowRateAndDischarge;
+            //Cd              0.9;
+
+            // // - Or, inject at a pressure
+            // flowType        pressureDrivenVelocity;
+            // Pinj            570e3; //Absolute pressure (Pa) - includes reference pressure (100kPa)
+        }
+
+        model2
+        {
+            $model1;
+            position        ( 0.125  -0.40   1.60);
+        }
+
+        model3
+        {
+            $model1;
+            position        ( -0.125  -0.40   1.60);
+        }
+
+        model4
+        {
+            $model1;
+            position        ( 0.125  -0.40   1.475);
+        }
+
+        model5
+        {
+            $model1;
+            position        ( 0     -0.40   1.475);
+        }
+
+
+        model6
+        {
+            $model1;
+            position        ( -0.125  -0.40   1.475);
+        }
+
+
+        model7
+        {
+            $model1;
+            position        ( 0.125  -0.40   1.35);
+        }
+
+        model8
+        {
+            $model1;
+            position        ( 0     -0.40   1.35);
+        }
+
+
+        model9
+        {
+            $model1;
+            position        ( -0.125  -0.40   1.35);
+        }
+
+
+        model10
+        {
+            $model1;
+            position        ( 0.125  -0.40   1.225);
+        }
+
+        model11
+        {
+            $model1;
+            position        ( 0     -0.40   1.225);
+        }
+
+
+        model12
+        {
+            $model1;
+            position        ( -0.125  -0.40   1.225);
+        }
+
+    }
+
+    dispersionModel none;
+
+    patchInteractionModel standardWallInteraction;
+
+    heatTransferModel none;
+
+    compositionModel singleMixtureFraction;
+
+    phaseChangeModel none;
+
+    devolatilisationModel none;
+
+    surfaceReactionModel none;
+
+    stochasticCollisionModel none;
+
+    surfaceFilmModel thermoSurfaceFilm;
+
+    radiation       off;
+
+    standardWallInteractionCoeffs  // interaction with non-film walls
+    {
+        type            escape; //absorb; rebound
+    }
+
+    singleMixtureFractionCoeffs
+    {
+        phases
+        (
+            gas
+            {
+            }
+            liquid
+            {
+                H2O         1;
+            }
+            solid
+            {
+            }
+        );
+        YGasTot0        0;
+        YLiquidTot0     1;
+        YSolidTot0      0;
+    }
+
+    thermoSurfaceFilmCoeffs
+    {
+        // interactionType absorb; //absorb; bounce; splashBai
+    
+        interactionType splashBai;
+        deltaWet        75e-6;   // equivlaent to 75 gsm (grams per square meter) of water
+        Adry            2630;
+        Awet            1320;
+        Cf              0.6;
+    }
+}
+
+
+cloudFunctions
+{}
+
+
+// ************************************************************************* //

@@ -1,0 +1,32 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Rotate subject
+angle=0
+runApplication surfaceTransformPoints constant/triSurface/target_orig.stl constant/triSurface/target.stl -rollPitchYaw "(0 0 $angle)"
+
+./Allmesh
+
+# cp -rf 0.orig 0
+
+# Set number of processors
+nProc=8
+foamDictionary system/decomposeParDict -entry numberOfSubdomains -set $nProc
+foamDictionary system/wallFilmRegion/decomposeParDict -entry numberOfSubdomains -set $nProc
+
+application=$(getApplication)
+
+runApplication -s primaryRegion  decomposePar
+runApplication -s wallFilmRegion decomposePar -region wallFilmRegion
+
+runParallel $application
+
+runApplication -s primaryRegion  reconstructPar
+runApplication -s wallFilmRegion reconstructPar -region wallFilmRegion
+
+rm -rf proc*
+
+#------------------------------------------------------------------------------
