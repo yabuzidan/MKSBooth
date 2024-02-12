@@ -83,8 +83,7 @@ subModels
             duration            100.0;          // total injection duration (s)
             
             // Quantities
-            massflowrate       0.000786111;   // kg/s - equivalent to 2.83 Litres per hour
-
+            massflowrate       0.00055555;   // kg/s - equivalent to 2.00 Litres per hour
             massTotal           #calc "$massflowrate*$duration";    //Total mass to be injected (kg), unused when parcelBasisType=fixed.
             parcelBasisType     mass; //fixed;
             parcelsPerSecond    10000; //10000
@@ -107,10 +106,10 @@ subModels
                 type         RosinRammler;
                 RosinRammlerDistribution
                 {
-                    minValue        100e-06;      // minimum droplet diameter m
-                    maxValue        250e-06;      // maximum droplet diameter m
-                    d               200e-06;      // most likely droplet size (mean) m
-                    n               2.0;          // Shape parameter
+                    minValue        20e-06;      // minimum droplet diameter m
+                    maxValue        60e-06;      // maximum droplet diameter m
+                    d               45e-06;      // most likely droplet size (mean) m
+                    n               2.0;         // Shape parameter
                 }
             }
             // {
@@ -126,7 +125,7 @@ subModels
             position        (-0.14  -0.40   1.60);
             direction       ( 0.00   1.00   0.00);
             thetaInner      constant 0;
-            thetaOuter      constant 15;
+            thetaOuter      constant 40;
 
             // - Inject at a point
             injectionMethod point;

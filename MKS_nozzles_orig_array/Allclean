@@ -8,7 +8,7 @@ cleanCase
 
 rm -rf constant/wallFilmRegion
 rm -rf constant/extendedFeatureEdgeMesh
-rm constant/triSurface/*.eMesh
+rm -f constant/triSurface/*.eMesh
 rm -f *.obj
 
 #------------------------------------------------------------------------------

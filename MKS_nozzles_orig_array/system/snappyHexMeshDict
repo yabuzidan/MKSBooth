@@ -18,7 +18,7 @@ FoamFile
 // Which of the steps to run
 castellatedMesh on;
 snap            on;
-addLayers       on;
+addLayers       off;
 
 
 // Geometry. Definition of all surfaces. All surfaces are of class
@@ -29,11 +29,8 @@ addLayers       on;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-    filmWalls
-    {
-        type triSurfaceMesh;
-        file "target.stl";
-    }
+    // filmWalls {type triSurfaceMesh; file "target.stl";}
+    refinementRegion1 {type triSurfaceMesh; file "RR1.stl";}
 };
 
 
@@ -85,11 +82,11 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
-        {
-            file "target.eMesh";
-            level 1;
-            nCellsBetweenLevels 2;
-        }
+        // {
+        //     file "target.eMesh";
+        //     level 1;
+        //     nCellsBetweenLevels 2;
+        // }
     );
 
 
@@ -153,6 +150,8 @@ castellatedMeshControls
         //     mode distance;             // refinement level 5 within 1.0 m
         //     levels ((0.05 1) (0.1 1)); // levels must be ordered nearest first
         // }
+
+        refinementRegion1 {mode inside; levels ((2 2));}
     }
 
     // Mesh selection
@@ -163,7 +162,7 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh (0.4 0.4 1);
+    locationInMesh (0.4 -0.2 1);
 
 
     // Whether any faceZones (as specified in the refinementSurfaces)

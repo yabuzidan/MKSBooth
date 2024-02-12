@@ -1,12 +1,23 @@
 #!/bin/sh
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
+
+# Copy refinement region
+# scale
+runApplication -s sc -o surfaceTransformPoints constant/triSurface/orig_RR1.stl constant/triSurface/scaled_RR1.stl  -scale "(1 1 1)"  > /dev/null 2>&1
+# rotate
+runApplication -s ro -o surfaceTransformPoints constant/triSurface/scaled_RR1.stl constant/triSurface/rot_RR1.stl  -rollPitchYaw "(-90 0 0)"  > /dev/null 2>&1
+# translate
+runApplication -s tr -o surfaceTransformPoints constant/triSurface/rot_RR1.stl constant/triSurface/RR1.stl  -translate "(-0.14 -0.4 1.6)"  > /dev/null 2>&1
+
+
+
+
 runApplication blockMesh
 
 runApplication surfaceFeatures
 runApplication snappyHexMesh -overwrite
 
-#runApplication setSet -batch wallFilmRegion.setSet
 runApplication topoSet
 
 runApplication extrudeToRegionMesh -overwrite
